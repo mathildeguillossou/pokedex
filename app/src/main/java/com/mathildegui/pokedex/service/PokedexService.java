@@ -20,7 +20,7 @@ public interface PokedexService {
     //Call<List<Pokemon>> listPokemons(@Path("pokeId") String pokeId);
 
     @GET
-    Call<ResponseBody> listPokemonsFromUrl(@Url String url);
+    Call<ResponseBody> getStringFromUrl(@Url String url);
 
     @GET("pokemon/{pokeId}")
     Call<Pokemon> getPokemon(@Path("pokeId") String pokeId);

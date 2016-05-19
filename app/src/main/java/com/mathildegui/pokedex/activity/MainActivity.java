@@ -1,6 +1,5 @@
 package com.mathildegui.pokedex.activity;
 
-import android.net.Uri;
 import android.os.Bundle;
 
 import com.mathildegui.pokedex.R;

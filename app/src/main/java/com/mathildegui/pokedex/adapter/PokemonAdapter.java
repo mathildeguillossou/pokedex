@@ -1,5 +1,6 @@
 package com.mathildegui.pokedex.adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import com.mathildegui.pokedex.R;
 import com.mathildegui.pokedex.bean.Pokemon;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -19,9 +21,11 @@ public class PokemonAdapter extends
         RecyclerView.Adapter<PokemonAdapter.ViewHolder>{
 
     private List<Pokemon> list;
+    private Context context;
 
-    public PokemonAdapter(List<Pokemon> list) {
-        this.list = list;
+    public PokemonAdapter(Context context, List<Pokemon> list) {
+        this.list    = list;
+        this.context = context;
     }
 
     @Override
@@ -34,6 +38,14 @@ public class PokemonAdapter extends
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.tv.setText(list.get(position).name);
+        Picasso
+                .with(context)
+                .load("http://pokeapi.co/media/img/"+list.get(position).id+".png")
+                .fit()
+                .error(R.mipmap.ic_launcher)
+                .placeholder(R.mipmap.ic_launcher)
+                .into(holder.iv);
+
     }
 
     @Override

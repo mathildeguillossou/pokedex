@@ -73,6 +73,7 @@ public class MainListFragment extends Fragment {
         }
     }
 
+    private String uri = "http://pokeapi.co/api/v1/sprite/";
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -96,7 +97,7 @@ public class MainListFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new PokemonAdapter(mPokemons);
+        mAdapter = new PokemonAdapter(getContext(), mPokemons);
         mRecyclerView.setAdapter(mAdapter);
 
 
@@ -115,7 +116,7 @@ public class MainListFragment extends Fragment {
     }
 
     private void getNext(final PokedexService service , String url) {
-        Call<ResponseBody> call = service.listPokemonsFromUrl(url);
+        Call<ResponseBody> call = service.getStringFromUrl(url);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -133,15 +134,45 @@ public class MainListFragment extends Fragment {
 
                         for (int i = 0; i < jsonarray.length(); i++) {
                             JSONObject jsonPokemon = jsonarray.getJSONObject(i);
+                            Log.d("id", jsonPokemon.toString());
                             //String replaced = ms.replace("\\", "");
 
                             String url = jsonPokemon.getString("url");
-                            String name = jsonPokemon.getString("name");
+                           final  String name = jsonPokemon.getString("name");
 
-                            mPokemons.add(new Pokemon(i, name));
+String[] arr = url.split("/");
+                            Log.d("Array", arr[arr.length -1]);
+                            mPokemons.add(new Pokemon(Integer.parseInt(arr[arr.length -1]), name, null));
+                            /*Call<ResponseBody> callImage = service.getStringFromUrl(uri+arr[arr.length -1]);
+                            callImage.enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if(response.body() != null) {
+                                        String responseString = null;
+                                        try {
+                                            responseString = response.body().string().replace('\"', '\'');
+                                            JSONObject jsonobject = new JSONObject(responseString);
+                                            String image = jsonobject.getString("image");
+                                            Log.d("image", image);
 
-                            Log.d("POKEMON", url);
-                            Log.d("POKEMON NAME", name);
+                                            mPokemons.add(new Pokemon(it, name, image));
+
+                                            //Log.d("POKEMON", url);
+                                            Log.d("POKEMON NAME", name);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                                }
+                            });*/
+
                         /*Call<Pokemon> pokemon = service.getPokemonFromUrl(url);
                         pokemon.enqueue(new Callback<Pokemon>() {
                             @Override
