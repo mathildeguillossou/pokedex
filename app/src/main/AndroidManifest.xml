@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
+        android:name=".PokeApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -22,7 +23,7 @@
         </activity>
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="b3276551b1728c85e1baa8eafe5c8533b20e3c13" />
+            android:value="d750e3face02eaa24ab58b97dc4823e93ec9ff15" />
     </application>
 
 </manifest>
