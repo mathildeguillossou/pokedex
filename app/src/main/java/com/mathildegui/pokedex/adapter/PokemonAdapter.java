@@ -17,7 +17,7 @@ import java.util.List;
  * @author mathilde on 19/05/16.
  */
 public class PokemonAdapter extends
-        RecyclerView.Adapter<PokemonAdapter.ViewHolder>{
+        RecyclerView.Adapter<PokemonAdapter.ViewHolder> {
 
     private List<Pokemon> list;
     private Context mContext;
@@ -63,6 +63,10 @@ public class PokemonAdapter extends
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    public Pokemon getPokemon(int position) {
+        return list.get(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -1,6 +1,7 @@
 package com.mathildegui.pokedex.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -16,8 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mathildegui.pokedex.R;
+import com.mathildegui.pokedex.activity.MainActivity;
+import com.mathildegui.pokedex.activity.PokemonActivity;
 import com.mathildegui.pokedex.adapter.PokemonAdapter;
 import com.mathildegui.pokedex.bean.Pokemon;
+import com.mathildegui.pokedex.listener.RecyclerItemClickListener;
 import com.mathildegui.pokedex.service.PokedexService;
 import com.mathildegui.pokedex.utils.Constants;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
@@ -85,10 +89,10 @@ public class MainListFragment extends Fragment {
     }
 
     private String uri = "http://pokeapi.co/api/v1/sprite/";
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private List<Pokemon> mPokemons;
+    private PokemonAdapter mAdapter;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -110,10 +114,47 @@ public class MainListFragment extends Fragment {
         // specify an adapter (see also next example)
         mAdapter = new PokemonAdapter(getContext(), mPokemons);
         mRecyclerView.setAdapter(mAdapter);
-
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        // TODO Handle item click
+                        Log.d("POKEMON", mAdapter.getPokemon(position).toString());
+                        getPokemon(String.valueOf(mAdapter.getPokemon(position).id));
+                        startActivity(new Intent(getActivity(), PokemonActivity.class));
+                    }
+                })
+        );
 
         getPokemonList();
         return v;
+    }
+
+    private Pokemon getPokemon(String id) {
+        final Pokemon[] pokemon = {new Pokemon()};
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.URL_MAIN)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        final PokedexService service = retrofit.create(PokedexService.class);
+        Call<ResponseBody> call = service.getPokemon(id);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Log.d("POKEMON", response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //pokemon[0] = response.body();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+        return pokemon[0];
     }
 
     private void getPokemonList() {
@@ -128,10 +169,13 @@ public class MainListFragment extends Fragment {
         List<Pokemon> pokemons = SQLite.select()
                 .from(Pokemon.class)
                 .queryList();
-        mPokemons.addAll(pokemons);
-        //if(pokemons.size() == 0) {
+
+        if(pokemons.size() == 0) {
             getNext(service, Constants.BASE_URL_API);
-        //}
+        } else {
+            mPokemons.addAll(pokemons);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void getNext(final PokedexService service , String url) {

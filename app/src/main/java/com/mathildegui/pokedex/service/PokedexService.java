@@ -2,8 +2,6 @@ package com.mathildegui.pokedex.service;
 
 import com.mathildegui.pokedex.bean.Pokemon;
 
-import java.util.List;
-
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -23,7 +21,7 @@ public interface PokedexService {
     Call<ResponseBody> getStringFromUrl(@Url String url);
 
     @GET("pokemon/{pokeId}")
-    Call<Pokemon> getPokemon(@Path("pokeId") String pokeId);
+    Call<ResponseBody> getPokemon(@Path("pokeId") String pokeId);
 
     @GET
     Call<Pokemon> getPokemonFromUrl(@Url String url);
