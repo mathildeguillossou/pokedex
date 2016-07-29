@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.mathildegui.pokedex.R;
 import com.mathildegui.pokedex.bean.Pokemon;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -21,11 +20,11 @@ public class PokemonAdapter extends
         RecyclerView.Adapter<PokemonAdapter.ViewHolder>{
 
     private List<Pokemon> list;
-    private Context context;
+    private Context mContext;
 
     public PokemonAdapter(Context context, List<Pokemon> list) {
         this.list    = list;
-        this.context = context;
+        this.mContext = context;
     }
 
     @Override
@@ -37,15 +36,28 @@ public class PokemonAdapter extends
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.tv.setText(list.get(position).name);
+        Pokemon pokemon = list.get(position);
+        holder.tv.setText(pokemon.name);
+
+        if(pokemon.image != null) {
+            holder.iv.setImageBitmap(pokemon.image);
+        } else {
+            holder.iv.setImageResource(R.mipmap.ic_launcher);
+        }
+
+        /*int id = (mContext.getResources().getIdentifier("poke_"+pokemon.pokeId , "drawable", mContext.getPackageName()) == 0)?
+                R.mipmap.ic_launcher :
+                mContext.getResources().getIdentifier("poke_"+pokemon.pokeId , "drawable", mContext.getPackageName());
+        holder.iv.setImageResource(+id);*/
+/*
+        //FIXME : Add images in local for better performances
         Picasso
-                .with(context)
+                .with(mContext)
                 .load("http://pokeapi.co/media/img/"+list.get(position).id+".png")
                 .fit()
                 .error(R.mipmap.ic_launcher)
                 .placeholder(R.mipmap.ic_launcher)
-                .into(holder.iv);
-
+                .into(holder.iv);*/
     }
 
     @Override

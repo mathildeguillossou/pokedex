@@ -3,6 +3,8 @@ package com.mathildegui.pokedex;
 import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
+import com.raizlabs.android.dbflow.config.FlowConfig;
+import com.raizlabs.android.dbflow.config.FlowManager;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -14,5 +16,9 @@ public class PokeApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
+        FlowManager.init(new FlowConfig
+                .Builder(this)
+                .openDatabasesOnInit(true)
+                .build());
     }
 }

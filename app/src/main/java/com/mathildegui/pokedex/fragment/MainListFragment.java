@@ -1,8 +1,12 @@
 package com.mathildegui.pokedex.fragment;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,12 +20,19 @@ import com.mathildegui.pokedex.adapter.PokemonAdapter;
 import com.mathildegui.pokedex.bean.Pokemon;
 import com.mathildegui.pokedex.service.PokedexService;
 import com.mathildegui.pokedex.utils.Constants;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +123,15 @@ public class MainListFragment extends Fragment {
                 .build();
 
         final PokedexService service = retrofit.create(PokedexService.class);
-        getNext(service, Constants.BASE_URL_API);
+        exportDatabse("PokeDatabase.db");
+
+        List<Pokemon> pokemons = SQLite.select()
+                .from(Pokemon.class)
+                .queryList();
+        mPokemons.addAll(pokemons);
+        //if(pokemons.size() == 0) {
+            getNext(service, Constants.BASE_URL_API);
+        //}
     }
 
     private void getNext(final PokedexService service , String url) {
@@ -135,56 +154,19 @@ public class MainListFragment extends Fragment {
                         for (int i = 0; i < jsonarray.length(); i++) {
                             JSONObject jsonPokemon = jsonarray.getJSONObject(i);
                             Log.d("id", jsonPokemon.toString());
-                            //String replaced = ms.replace("\\", "");
 
                             String url = jsonPokemon.getString("url");
-                           final  String name = jsonPokemon.getString("name");
+                            final  String name = jsonPokemon.getString("name");
 
-String[] arr = url.split("/");
-                            Log.d("Array", arr[arr.length -1]);
-                            mPokemons.add(new Pokemon(Integer.parseInt(arr[arr.length -1]), name, null));
-                            /*Call<ResponseBody> callImage = service.getStringFromUrl(uri+arr[arr.length -1]);
-                            callImage.enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if(response.body() != null) {
-                                        String responseString = null;
-                                        try {
-                                            responseString = response.body().string().replace('\"', '\'');
-                                            JSONObject jsonobject = new JSONObject(responseString);
-                                            String image = jsonobject.getString("image");
-                                            Log.d("image", image);
+                            String[] arr = url.split("/");
 
-                                            mPokemons.add(new Pokemon(it, name, image));
+                            Pokemon p = new Pokemon();
+                            p.name    = name;
+                            p.pokeId  = Integer.parseInt(arr[arr.length -1]);
+                            p.save();
+                            new PokemonBitmapAsync().execute(p);
 
-                                            //Log.d("POKEMON", url);
-                                            Log.d("POKEMON NAME", name);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-                                }
-                            });*/
-
-                        /*Call<Pokemon> pokemon = service.getPokemonFromUrl(url);
-                        pokemon.enqueue(new Callback<Pokemon>() {
-                            @Override
-                            public void onResponse(Call<Pokemon> call, Response<Pokemon> response) {
-                                Log.d("reponse poke", response.body().toString());
-                            }
-
-                            @Override
-                            public void onFailure(Call<Pokemon> call, Throwable t) {
-
-                            }
-                        });*/
+                            mPokemons.add(p);
 
                             if (i == jsonarray.length() - 1) {
                                 if (next != null) {
@@ -204,6 +186,49 @@ String[] arr = url.split("/");
 
             }
         });
+    }
+
+    public static class PokemonBitmapAsync extends AsyncTask<Pokemon, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Pokemon... pokemons) {
+            Log.d("THE_URL::", "http://pokeapi.co/media/img/" + pokemons[0].pokeId+".png");
+
+            try {
+                pokemons[0].image = BitmapFactory.decodeStream(new URL("http://pokeapi.co/media/img/" + pokemons[0].pokeId+".png").openStream());
+                pokemons[0].update();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    public void exportDatabse(String databaseName) {
+        try {
+            File sd = Environment.getExternalStorageDirectory();
+            File data = Environment.getDataDirectory();
+
+            Log.d("sd.canWrite", sd.canWrite() +"");
+
+            if (sd.canWrite()) {
+                String currentDBPath = "//data//"+getActivity().getPackageName()+"//databases//"+databaseName+"";
+                String backupDBPath = "backupname.db";
+                File currentDB = new File(data, currentDBPath);
+                File backupDB = new File("/sdcard/", backupDBPath);
+                Log.d("PATH_BK",backupDB.getAbsolutePath() + "");
+
+                if (currentDB.exists()) {
+                    FileChannel src = new FileInputStream(currentDB).getChannel();
+                    FileChannel dst = new FileOutputStream(backupDB).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+                }
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     @Override

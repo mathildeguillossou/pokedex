@@ -1,9 +1,14 @@
 package com.mathildegui.pokedex.activity;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.mathildegui.pokedex.R;
+import com.mathildegui.pokedex.bean.Pokemon;
 import com.mathildegui.pokedex.fragment.MainListFragment;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
+
+import java.util.List;
 
 public class MainActivity extends BaseActivity implements MainListFragment.OnFragmentInteractionListener {
 
